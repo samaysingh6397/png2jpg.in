@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Free PNG to JPG and JPG to PNG converter. Convert your PNG and JPG images to the other format quickly and easily.">
+    <meta name="keywords" content="PNG to JPG, JPG to PNG, image converter, online image conversion tool">
+    <meta name="author" content="Your Website Name">
+    <title>PNG to JPG / JPG to PNG Converter | Free Online Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .description {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #drop-area {
+            border: 2px dashed #4CAF50;
+            padding: 30px;
+            text-align: center;
+            background-color: #f9f9f9;
+            color: #4CAF50;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        #drop-area.hover {
+            background-color: #e0f7e0;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+        }
+        #result img {
+            max-width: 100%;
+            height: auto;
+        }
+        .download-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .download-btn:hover {
+            background-color: #1976D2;
+        }
+        /* Banner Ad */
+        .banner-ad {
+            width: 100%;
+            height: 100px;
+            background-color: #ddd;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 100px;
+        }
+        /* Bottom Ads */
+        .bottom-ads {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+        .bottom-ad {
+            width: 300px;
+            height: 300px;
+            background-color: #ddd;
+            text-align: center;
+            line-height: 300px;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Banner Ad -->
+    <div class="banner-ad">
+        <p>Top Banner Ad - Your Ad Here</p>
+    </div>
+
+    <div class="container">
+        <h1>PNG to JPG / JPG to PNG Converter</h1>
+        <p class="description">Convert your PNG and JPG images to the other format for free. Upload your images, and we’ll handle the rest!</p>
+
+        <!-- Drag and Drop Box -->
+        <div id="drop-area" onclick="document.getElementById('upload').click()" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
+            <p>Drag & Drop your PNG or JPG files here or click to select files.</p>
+            <input type="file" id="upload" accept=".png, .jpg, .jpeg" multiple onchange="handleFileSelect(event)" />
+        </div>
+
+        <!-- Convert Button -->
+        <button onclick="convertImages()">Convert Images</button>
+
+        <!-- Result Section -->
+        <div id="result">
+            <h2>Converted Images:</h2>
+            <div id="output-container"></div>
+            <br />
+            <button class="download-btn" id="download-btn" onclick="downloadZip()">Download Converted Images</button>
+        </div>
+    </div>
+
+    <!-- Bottom Ads -->
+    <div class="bottom-ads">
+        <div class="bottom-ad">
+            <p>Ad Space 1</p>
+        </div>
+        <div class="bottom-ad">
+            <p>Ad Space 2</p>
+        </div>
+        <div class="bottom-ad">
+            <p>Ad Space 3</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+
+    <script>
+        let filesToConvert = []; // Array to store the selected files
+
+        // Handle drag over event
+        function handleDragOver(event) {
+            event.preventDefault();
+            document.getElementById("drop-area").classList.add("hover");
+        }
+
+        // Handle file drop event
+        function handleDrop(event) {
+            event.preventDefault();
+            document.getElementById("drop-area").classList.remove("hover");
+            const files = event.dataTransfer.files;
+            handleFiles(files);
+        }
+
+        // Handle file selection
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            handleFiles(files);
+        }
+
+        // Handle the selected files
+        function handleFiles(files) {
+            filesToConvert = Array.from(files).filter(file => file.type === "image/png" || file.type === "image/jpeg");
+            if (filesToConvert.length > 0) {
+                document.getElementById("result").style.display = "none";
+                convertImages();
+            } else {
+                alert("Please upload valid PNG or JPG files.");
+            }
+        }
+
+        // Convert images
+        function convertImages() {
+            const outputContainer = document.getElementById("output-container");
+            outputContainer.innerHTML = ""; // Clear previous results
+
+            const zip = new JSZip(); // Create a new zip file
+
+            filesToConvert.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const image = new Image();
+                    image.src = event.target.result;
+                    image.onload = function() {
+                        const canvas = document.createElement("canvas");
+                        const ctx = canvas.getContext("2d");
+                        canvas.width = image.width;
+                        canvas.height = image.height;
+                        ctx.drawImage(image, 0, 0);
+
+                        let convertedDataUrl;
+                        const fileName = file.name.split('.')[0];
+                        if (file.type === "image/png") {
+                            convertedDataUrl = canvas.toDataURL("image/jpeg");
+                            zip.file(fileName + ".jpg", convertedDataUrl.split(',')[1], { base64: true });
+                        } else if (file.type === "image/jpeg") {
+                            convertedDataUrl = canvas.toDataURL("image/png");
+                            zip.file(fileName + ".png", convertedDataUrl.split(',')[1], { base64: true });
+                        }
+
+                        // Display the converted image
+                        const imgElement = document.createElement("img");
+                        imgElement.src = convertedDataUrl;
+                        imgElement.alt = `Converted Image ${index + 1}`;
+                        imgElement.style.width = "100px";
+                        outputContainer.appendChild(imgElement);
+                    };
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Once all files are processed, offer them as a zip download
+            zip.generateAsync({ type: "blob" }).then(function(content) {
+                document.getElementById("download-btn").onclick = function() {
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(content);
+                    link.download = "converted_images.zip";
+                    link.click();
+                };
+                document.getElementById("result").style.display = "block";
+            });
+        }
+
+        // Trigger download of the zip file
+        function downloadZip() {
+            // This function is called automatically after conversion
+        }
+    </script>
+</body>
+</html>
